@@ -2,7 +2,13 @@ use std::{fs::write};
 use crate::io;
 
 
-const DEFAULT_MAIL: &str = "==STYLE
+const DEFAULT_MAIL: &str = "==SUBJECT
+Test e-mail
+==FROM
+Alice <alice@nonexistent.domain>
+==TO
+Bob <bob@nonexistent.domain>
+==STYLE
 body {
     font-family: Arial;
     color: white;
