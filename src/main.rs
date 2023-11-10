@@ -1,10 +1,15 @@
 mod config;
 mod mail_file;
 mod io;
+mod connection;
+
+
+#[cfg(test)]
+mod tests;
 
 
 use std::env::args;
-use config::loader::{ConfigItem, load_config, get_home_folder, search_key_in_config};
+use config::loader::{ConfigItem, load_config, get_home_folder};
 
 
 fn main() {

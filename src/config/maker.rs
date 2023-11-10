@@ -65,7 +65,7 @@ fn find_and_replace(needle: Vec<&str>, replacement: Vec<&String>, haystack: &str
 /**
 Fetch the template and replace provided fields.
 */
-fn generate_config_file(
+pub fn generate_config_file(
     host: &String,
     username: &String,
     password: &String,
