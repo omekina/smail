@@ -36,7 +36,7 @@ pub fn load_config(config_file_path: &String) -> Option<Vec<ConfigItem>> {
 /**
 Main configuration parsing function.
 */
-fn parse_config(config_file_contents: &String) -> Option<Vec<ConfigItem>> {
+pub fn parse_config(config_file_contents: &String) -> Option<Vec<ConfigItem>> {
 
     let config_file_lines = config_file_contents.split('\n');
     let mut parsed_config: Vec<ConfigItem> = Vec::new();
@@ -76,7 +76,7 @@ fn parse_config(config_file_contents: &String) -> Option<Vec<ConfigItem>> {
         }
 
         // Separate line by equal sign and save key-value pair
-        let line_split: Vec<&str> = current_line.split("=").collect();
+        let line_split: Vec<&str> = current_line.splitn(2, "=").collect();
         if line_split.len() != 2 {
             output::error("Bad config file syntax at line:");
             println!("{}", current_line);
@@ -103,7 +103,7 @@ Search given array of ConfigItems and return value with specified key.
 */
 pub fn search_key_in_config(configuration: &Vec<ConfigItem>, key: &str) -> Option<String> {
     for current_item in configuration {
-        if &current_item.key == key {
+        if current_item.key == key {
             return Some(current_item.value.clone());
         }
     }
