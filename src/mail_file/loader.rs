@@ -58,3 +58,16 @@ fn parse_mail_file(mail_file_contents: &String) -> Option<Vec<MailField>> {
 
     return Some(result);
 }
+
+
+/**
+Search given array of MailFields and return value with specified key.
+ */
+pub fn search_key_in_mail_file(mail_file_contents: &Vec<MailField>, key: &str) -> Option<String> {
+    for current_item in mail_file_contents {
+        if current_item.flag == key {
+            return Some(current_item.content.clone());
+        }
+    }
+    return None;
+}
