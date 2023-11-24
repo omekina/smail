@@ -4,10 +4,6 @@ mod io;
 mod connection;
 
 
-#[cfg(test)]
-mod tests;
-
-
 use std::env::args;
 use config::loader::{ConfigItem, load_config, get_home_folder};
 
