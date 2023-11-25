@@ -14,8 +14,6 @@ john@smith.domain
 ==STYLE
 body {
     font-family: Arial;
-    color: white;
-    background-color: black;
 }
 ==BODY
 <h1>Hello, world!</h1>
