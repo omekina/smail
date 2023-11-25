@@ -47,7 +47,6 @@ pub fn wrap_connection(raw_stream: TcpStream, host: &String) -> Option<TlsStream
         Ok(value) => value,
         Err(_) => { return None; }
     };
-    output::success("Completed TLS/SSL handshake");
     return Some(stream);
 }
 
