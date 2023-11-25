@@ -21,7 +21,6 @@ password={password}
 
 
 # The e-mail_file file created with 'smail create' command will be placed into this template.
-# Use {body} and {style} to insert the content.
 # Tabs are here just for configuration file clarity.
 # Since the insertion blocks are directly replaced with the text from e-mail_file files,
 # the tabbing will not be preserved.
