@@ -41,6 +41,8 @@ pub fn handshake(host: &String, port: &String) -> Option<TlsStream<TcpStream>> {
         return None;
     }
 
+    output::success("Completed ESMTP handshake");
+
     return Some(stream);
 }
 
@@ -83,6 +85,161 @@ pub fn auth_login(
         return None;
     }
 
+    output::success("Logged in");
+
+    return Some(());
+}
+
+
+/**
+True if the payload should be okay, False if not.
+*/
+fn check_email_payload(payload: &String) -> bool {
+    for current_char in payload.chars() {
+        match current_char {
+            '<' => return false,
+            '>' => return false,
+            '\r' => return false,
+            '\n' => return false,
+            ':' => return false,
+            _ => {},
+        }
+    }
+    return true;
+}
+
+
+/**
+Escape e-mail body.
+*/
+fn escape_email_body(body: &String) -> Option<String> {
+
+    /* Carriage returns are not allowed and should not be used with Linux. */
+    if body.contains("\r") {
+        return None;
+    }
+
+    /* Process the e-mail body into lines. */
+    let mut result: String = String::new();
+    let body_lines = body.split("\n");
+    for current_line in body_lines {
+
+        /* Allow blank lines. */
+        if current_line.len() == 0 {
+            result += "\r\n";
+            continue;
+        }
+
+        /* Escape lines beginning with dot. */
+        if current_line.chars().nth(0)? == '.' {
+            result += ".";
+        }
+
+        /* Append current line to the result. */
+        result += &(String::from(current_line) + "\r\n");
+    }
+
+    return Some(result);
+}
+
+
+/**
+Prepare data for transmission.
+
+Name from, e-mail from and to as well as subject should be already checked.
+*/
+fn format_data(
+    name_from: &String,
+    email_from: &String,
+    email_to: &Vec<&str>,
+    subject: &String,
+    html_content: &String
+) -> Option<String> {
+    let mut result = String::new();
+
+    /* Add some general information. */
+    result += "User-Agent: smail (https://github.com/omekina/smail)\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n";
+
+    /* Add sender info. */
+    result += &(String::from("From: ") + name_from + " <" + email_from + ">\r\n");
+
+    /* Add recipient info. */
+    let mut recipients: String = String::new();
+    for current_recipient in email_to {
+        if recipients.len() != 0 { recipients += ", "; }
+        recipients += current_recipient;
+    }
+    result += &(String::from("To: ") + &recipients + "\r\n");
+
+    /* Add subject and end head. */
+    result += &(String::from("Subject: ") + &subject + "\r\n\r\n");
+
+    /* Add e-mail body and data end. */
+    result += &(escape_email_body(html_content)? + "\r\n.\r\n");
+
+    return Some(result);
+}
+
+
+/**
+Send mail in open and authenticated state.
+*/
+pub fn send_mail(
+    stream: &mut TlsStream<TcpStream>,
+    name_from: &String,
+    email_from: &String,
+    email_to: &Vec<&str>,
+    subject: &String,
+    html_content: &String,
+) -> Option<()> {
+    if !check_email_payload(&name_from) || !check_email_payload(&email_from) || !check_email_payload(subject) || email_to.len() == 0 {
+        output::error("Invalid characters in e-mail fields");
+        return None;
+    }
+    for current_email in email_to {
+        if !check_email_payload(&String::from(*current_email)) {
+            output::error("Invalid characters in e-mail fields");
+            return None;
+        }
+    }
+
+    /* Send from e-mail. */
+    stream.write_all((String::from("MAIL FROM: <") + email_from + ">\r\n").as_bytes()).ok()?;
+    let received = socket_handler::receive_tls(stream)?;
+    if received.chars().take(3).collect::<String>() != "250" {
+        output::error("Server did not accept the sender e-mail");
+        return None;
+    }
+
+    /* Send recipient e-mail(s). */
+    for current_recipient in email_to {
+        stream.write_all((String::from("RCPT TO: <") + current_recipient + ">\r\n").as_bytes()).ok()?;
+        let received = socket_handler::receive_tls(stream)?;
+        if received.chars().take(3).collect::<String>() != "250" {
+            output::error("Server did not accept recipient e-mail(s)");
+            return None;
+        }
+    }
+
+    /* Begin data transmission. */
+    stream.write_all("DATA\r\n".as_bytes()).ok()?;
+    let received = socket_handler::receive_tls(stream)?;
+    if received.chars().take(3).collect::<String>() != "354" {
+        output::error("Server pre-rejected e-mail data");
+        return None;
+    }
+
+    /* Send data. */
+    stream.write_all(format_data(name_from, email_from, email_to, subject, html_content)?.as_bytes()).ok()?;
+    let received = socket_handler::receive_tls(stream)?;
+    if received.chars().take(3).collect::<String>() != "250" {
+        output::error("Server rejected the e-mail content");
+        return None;
+    }
+
+    output::success("\nMail sent:");
+    println!("{}", subject);
+
     return Some(());
 }
 
@@ -101,33 +258,3 @@ pub fn close(mut stream: TlsStream<TcpStream>) {
     };
     let _ = stream.shutdown();
 }
-
-
-/* Example communication:
-
-= TCP handshake =
-< b'220 nonexistent-mail.mekina.cz Very good imaginary mail server\r\n'
-> b'STARTTLS\r\n'
-< b'220 2.0.0 Go ahead\r\n'
-= TLS handshake =
-> b'EHLO [::1]\r\n'
-< b'250-nonexistent-mail.mekina.cz\r\n250 SOME EXTENSION\r\n250 AUTH LOGIN\r\n'
-> b'AUTH LOGIN\r\n'
-< b'334 VXNlcm5hbWU6\r\n' (meaning 'Username:')
-> USERNAME
-< b'334 UGFzc3dvcmQ6\r\n' (meaning 'Password:')
-> PASSWORD
-< b'235 2.7.0 Authentication successful\r\n'
-> b'MAIL FROM:<ondrej@mekina.cz>\r\n'
-< b'250 2.1.0 Ok\r\n'
-> b'RCPT TO:<ondrej@mekina.cz>\r\n'
-< b'250 2.1.5 Ok\r\n'
-> b'DATA\r\n'
-< b'354 End data with <CR><LF>.<CR><LF>\r\n'
-> b'Hello, world!\r\n'
-> b'\r\n.\r\n'
-< b'250 2.0.0 Ok: queued as somethingnice\r\n'
-> b'QUIT\r\n'
-< b'221 2.0.0 Have a nice one\r\n'
-
- */
