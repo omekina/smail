@@ -17,7 +17,7 @@ body {
 }
 ==BODY
 <h1>Hello, world!</h1>
-<p>This is a test mail_file from SMAIL.</p>
+<p>This is a test mail file from SMAIL.</p>
 <p>
     You can find SMAIL source code
     <a href=\"https://github.com/omekina/smail\">here</a>
