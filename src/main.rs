@@ -2,6 +2,7 @@ mod config;
 mod mail_file;
 mod io;
 mod connection;
+mod sender;
 
 
 use std::env::args;
@@ -57,6 +58,14 @@ fn runtime() -> i32 {
         Some(parsed_config) => parsed_config,
         None => return 1,
     };
+
+    /* If send command was issued -> send e-mail(s). */
+    if action == "send" {
+        return match sender::send(&console_arguments, &configuration) {
+            Some(_) => 0,
+            None => 1,
+        };
+    }
 
     /* If no command was matched -> exit. */
     io::output::warning("Command not known:");
