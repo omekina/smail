@@ -4,20 +4,22 @@ use crate::io;
 
 const DEFAULT_MAIL: &str = "==SUBJECT
 Test e-mail
-==FROM
-Alice <alice@nonexistent.domain>
+==FROM-NAME
+Alice Smith
+==FROM-MAIL
+alice@nonexistent.domain
 ==TO
-Bob <bob@nonexistent.domain>
+bob@nonexistent.domain
+john@smith.domain
 ==STYLE
 body {
     font-family: Arial;
-    color: white;
-    background-color: black;
 }
 ==BODY
 <h1>Hello, world!</h1>
-<p>This is a test mail_file from SMAIL.</p>
-<p>You can find SMAIL source code
+<p>This is a test mail file from SMAIL.</p>
+<p>
+    You can find SMAIL source code
     <a href=\"https://github.com/omekina/smail\">here</a>
     if you are interested. &#128522;
 </p>

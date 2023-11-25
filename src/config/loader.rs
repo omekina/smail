@@ -107,6 +107,8 @@ pub fn search_key_in_config(configuration: &Vec<ConfigItem>, key: &str) -> Optio
             return Some(current_item.value.clone());
         }
     }
+    output::error("Configuration file entry was not found:");
+    println!("{}", key);
     return None;
 }
 

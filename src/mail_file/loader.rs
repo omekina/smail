@@ -15,7 +15,7 @@ pub struct MailField {
 Load e-mail file into fields.
 */
 pub fn load_mail_file(filepath: &String) -> Option<Vec<MailField>> {
-    let contents: String = match read_to_string(filepath) {
+    let contents: String = match read_to_string(&(filepath.clone() + ".smail")) {
         Ok(value) => value,
         Err(_) => {
             output::error("Could not read from SMAIL file.");
@@ -42,13 +42,17 @@ fn parse_mail_file(mail_file_contents: &String) -> Option<Vec<MailField>> {
         if current_line.len() > 2 && current_line[0..2].to_string() == "==" {
             if flag.len() > 0 { result.push(MailField { flag, content: temp }); }
             temp = String::new();
-            flag = String::from(&current_line[3..]);
+            flag = String::from(&current_line[2..]);
             continue;
         }
         if temp.len() > 0 {
             temp += "\n";
         }
         temp += current_line;
+    }
+
+    if flag.len() > 0 && temp.len() > 0 {
+        result.push(MailField { flag, content: temp });
     }
 
     if result.len() == 0 {
@@ -69,5 +73,7 @@ pub fn search_key_in_mail_file(mail_file_contents: &Vec<MailField>, key: &str) -
             return Some(current_item.content.clone());
         }
     }
+    output::error(".smail file entry was not found:");
+    println!("{}", key);
     return None;
 }
