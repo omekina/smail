@@ -101,7 +101,11 @@ pub fn init(filepath: &String, arguments: &Vec<String>) -> bool {
 
     // Get information from user
     let user_input = match io::input::read_items(
-        vec!["SMTP server hostname", "Your username", "Your password"]
+        vec![
+            io::input::InputItem::Normal("SMTP server hostname"),
+            io::input::InputItem::Normal("Your username"),
+            io::input::InputItem::Hidden("Your password"),
+        ]
     ) {
         Some(value) => value,
         None => {

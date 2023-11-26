@@ -20,7 +20,7 @@ smail init
 This will guide us through config file creation. If you wish you can change it manually.
 The config file should be located in `~/.smailconf`.
 
-The `smail init` command will openly prompt for your password and the password will
+The `smail init` command will prompt for your password and the password will
 be written in plaintext into the config file. So please keep that in mind.
 
 ### 2. Create a test mail

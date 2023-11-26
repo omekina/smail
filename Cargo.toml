@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 base64 = "0.21.5"
 native-tls = "0.2.11"
+rpassword = "7.3"
