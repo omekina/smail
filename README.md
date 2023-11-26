@@ -1,3 +1,5 @@
+<p align="center"><img src="smail.webp" width="400px" /></p>
+
 # SMAIL
 SMAIL is a command line tool for sending HTML e-mails.
 It uses secured ESMTP to communicate with the server and you can even store your
