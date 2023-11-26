@@ -39,7 +39,7 @@ fn parse_mail_file(mail_file_contents: &String) -> Option<Vec<MailField>> {
     let mut temp: String = String::new();
 
     for current_line in mail_file_lines {
-        if current_line.len() > 2 && current_line[0..2].to_string() == "==" {
+        if current_line.len() > 2 && current_line.chars().take(2).collect::<String>() == "==" {
             if flag.len() > 0 { result.push(MailField { flag, content: temp }); }
             temp = String::new();
             flag = String::from(&current_line[2..]);
