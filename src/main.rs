@@ -29,13 +29,17 @@ fn runtime() -> i32 {
         },
     };
 
-    /* Get arguments from console. */
-    let console_arguments: Vec<String> = args().collect();
+    /* Get console arguments. */
+    let mut console_arguments: Vec<String> = args().collect();
+
+    /* Get target action and trim the arguments. */
     if console_arguments.len() < 2 {
         io::output::warning("No command specified.");
         return 1;
     }
     let action = console_arguments.get(1).unwrap();
+    console_arguments.remove(0);
+    console_arguments.remove(0);
 
     /* If init command was issued -> make config and do not continue. */
     if action == "init" {

@@ -28,11 +28,11 @@ body {
 Create .smail file(s) specified by console arguments.
 */
 pub fn create(arguments: &Vec<String>) -> bool {
-    if arguments.len() < 3 {
+    if arguments.len() < 1 {
         io::output::warning("No desired files were specified.");
         return false;
     }
-    for argument_id in 2..arguments.len() {
+    for argument_id in 0..arguments.len() {
         let current_file = arguments.get(argument_id).unwrap().clone() + ".smail";
         match write(&current_file, DEFAULT_MAIL) {
             Ok(_) => { println!("Created file '{}'", current_file); },

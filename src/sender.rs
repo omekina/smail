@@ -20,14 +20,14 @@ pub enum Contact {
 Send `.smail` files identified by command line arguments.
 */
 pub fn send(arguments: &Vec<String>, configuration: &Vec<ConfigItem>) -> Option<()> {
-    if arguments.len() < 3 {
+    if arguments.len() < 1 {
         output::warning("No .smail file to send was specified");
         return None;
     }
 
     /* Fetch the .smail files. */
     let mut to_send: Vec<Vec<MailField>> = Vec::new();
-    for current_index in 2..arguments.len() {
+    for current_index in 0..arguments.len() {
         to_send.push(load_mail_file(arguments.get(current_index)?)?);
     }
 
