@@ -1,7 +1,8 @@
 use crate::config::loader::{ConfigItem, search_key_in_config};
 use crate::connection::smtp;
 use crate::io::output;
-use crate::mail_file::loader::{MailField, search_key_in_mail_file, load_mail_file};
+use std::io::{Read, stdin};
+use crate::mail_file::loader::{MailField, search_key_in_mail_file, load_mail_file, parse_mail_file};
 
 
 pub struct NamedContact {
@@ -20,15 +21,23 @@ pub enum Contact {
 Send `.smail` files identified by command line arguments.
 */
 pub fn send(arguments: &Vec<String>, configuration: &Vec<ConfigItem>) -> Option<()> {
-    if arguments.len() < 1 {
-        output::warning("No .smail file to send was specified");
-        return None;
-    }
-
-    /* Fetch the .smail files. */
     let mut to_send: Vec<Vec<MailField>> = Vec::new();
-    for current_index in 0..arguments.len() {
-        to_send.push(load_mail_file(arguments.get(current_index)?)?);
+
+    /* Load and parse files/stdin. */
+    if arguments.len() > 0 {
+        for current_index in 0..arguments.len() {
+            to_send.push(load_mail_file(arguments.get(current_index)?)?);
+        }
+    } else {
+        output::warning("Reading from stdin...");
+        let mut input = String::new();
+        let stdin = stdin();
+        let mut handle = stdin.lock();
+        match handle.read_to_string(&mut input) {
+            Ok(_) => {},
+            Err(_) => { output::error("Failed reading from stdin"); return None; }
+        };
+        to_send.push(parse_mail_file(&input)?);
     }
 
     /* Initiate connection to the server. */
@@ -44,7 +53,7 @@ pub fn send(arguments: &Vec<String>, configuration: &Vec<ConfigItem>) -> Option<
         &search_key_in_config(configuration, "password")?,
     )?;
 
-    /* Send mails. */
+    /* Send mail(s). */
     for current_mail in to_send {
         let mut mail_body = search_key_in_config(configuration, "=")?;
         for current_mail_field in &current_mail {
