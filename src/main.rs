@@ -6,7 +6,8 @@ mod sender;
 
 
 use std::env::args;
-use config::loader::{ConfigItem, load_config, get_home_folder};
+use config::loader::{ConfigItem, load_config};
+use config::path::get_home_folder;
 
 
 fn main() {

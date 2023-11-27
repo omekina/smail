@@ -1,4 +1,3 @@
-use std::env::var_os;
 use std::fs::read_to_string;
 use crate::io::output;
 
@@ -110,13 +109,4 @@ pub fn search_key_in_config(configuration: &Vec<ConfigItem>, key: &str) -> Optio
     output::error("Configuration file entry was not found:");
     println!("{}", key);
     return None;
-}
-
-
-/**
-Get absolute home folder path. Works only on Linux for now. :(
-*/
-pub fn get_home_folder() -> Option<String> {
-    let home_dir: String = var_os("HOME")?.into_string().ok()?;
-    return Some(home_dir);
 }
