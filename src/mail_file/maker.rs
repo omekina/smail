@@ -4,13 +4,11 @@ use crate::io;
 
 const DEFAULT_MAIL: &str = "==SUBJECT
 Test e-mail
-==FROM-NAME
-Alice Smith
-==FROM-MAIL
-alice@nonexistent.domain
+==FROM
+Alice Smith;alice@nonexistent.domain
 ==TO
 bob@nonexistent.domain
-john@smith.domain
+John Smith;john@smith.domain
 ==STYLE
 body {
     font-family: Arial;
