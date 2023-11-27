@@ -5,6 +5,7 @@ use native_tls::TlsStream;
 use super::socket_handler;
 use crate::io::output;
 use base64::engine::general_purpose;
+use crate::sender::Contact;
 
 
 /**
@@ -92,16 +93,15 @@ pub fn auth_login(
 
 
 /**
-True if the payload should be okay, False if not.
+This function checks if a field is valid http header field.
+
+Returns True if the payload should be okay, False if not.
 */
 fn check_email_payload(payload: &String) -> bool {
     for current_char in payload.chars() {
         match current_char {
-            '<' => return false,
-            '>' => return false,
             '\r' => return false,
             '\n' => return false,
-            ':' => return false,
             _ => {},
         }
     }
@@ -149,25 +149,36 @@ Prepare data for transmission.
 Name from, e-mail from and to as well as subject should be already checked.
 */
 fn format_data(
-    name_from: &String,
-    email_from: &String,
-    email_to: &Vec<&str>,
+    email_from: Contact,
+    emails_to: Vec<Contact>,
     subject: &String,
     html_content: &String
 ) -> Option<String> {
+    /* Subject check. */
+    if !check_email_payload(&subject) {
+        output::error("Subject contains invalid characters");
+        return None;
+    }
+
     let mut result = String::new();
 
     /* Add some general information. */
     result += "User-Agent: smail (https://github.com/omekina/smail)\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n";
 
     /* Add sender info. */
-    result += &(String::from("From: ") + name_from + " <" + email_from + ">\r\n");
+    result += &(String::from("From: ") + &match email_from {
+        Contact::Named(value) => value.name.clone() + " <" + &value.email + ">",
+        Contact::Email(value) => value,
+    } + "\r\n");
 
     /* Add recipient info. */
     let mut recipients: String = String::new();
-    for current_recipient in email_to {
+    for current_recipient in emails_to {
         if recipients.len() != 0 { recipients += ", "; }
-        recipients += current_recipient;
+        recipients += &match current_recipient {
+            Contact::Named(value) => value.name + " <" + &value.email + ">",
+            Contact::Email(value) => value,
+        };
     }
     result += &(String::from("To: ") + &recipients + "\r\n");
 
@@ -186,25 +197,17 @@ Send mail in open and authenticated state.
 */
 pub fn send_mail(
     stream: &mut TlsStream<TcpStream>,
-    name_from: &String,
-    email_from: &String,
-    email_to: &Vec<&str>,
+    email_from: Contact,
+    emails_to: Vec<Contact>,
     subject: &String,
     html_content: &String,
 ) -> Option<()> {
-    if !check_email_payload(&name_from) || !check_email_payload(&email_from) || !check_email_payload(subject) || email_to.len() == 0 {
-        output::error("Invalid characters in e-mail fields");
-        return None;
-    }
-    for current_email in email_to {
-        if !check_email_payload(&String::from(*current_email)) {
-            output::error("Invalid characters in e-mail fields");
-            return None;
-        }
-    }
 
     /* Send from e-mail. */
-    stream.write_all((String::from("MAIL FROM: <") + email_from + ">\r\n").as_bytes()).ok()?;
+    stream.write_all((String::from("MAIL FROM: <") + match &email_from {
+        Contact::Email(value) => value,
+        Contact::Named(value) => &value.email,
+    } + ">\r\n").as_bytes()).ok()?;
     let received = socket_handler::receive_tls(stream)?;
     if received.chars().take(3).collect::<String>() != "250" {
         output::error("Server did not accept the sender e-mail");
@@ -212,8 +215,11 @@ pub fn send_mail(
     }
 
     /* Send recipient e-mail(s). */
-    for current_recipient in email_to {
-        stream.write_all((String::from("RCPT TO: <") + current_recipient + ">\r\n").as_bytes()).ok()?;
+    for current_recipient in &emails_to {
+        stream.write_all((String::from("RCPT TO: <") + &match current_recipient {
+            Contact::Email(value) => value,
+            Contact::Named(value) => &value.email,
+        } + ">\r\n").as_bytes()).ok()?;
         let received = socket_handler::receive_tls(stream)?;
         if received.chars().take(3).collect::<String>() != "250" {
             output::error("Server did not accept recipient e-mail(s)");
@@ -230,7 +236,7 @@ pub fn send_mail(
     }
 
     /* Send data. */
-    stream.write_all(format_data(name_from, email_from, email_to, subject, html_content)?.as_bytes()).ok()?;
+    stream.write_all(format_data(email_from, emails_to, subject, html_content)?.as_bytes()).ok()?;
     let received = socket_handler::receive_tls(stream)?;
     if received.chars().take(3).collect::<String>() != "250" {
         output::error("Server rejected the e-mail content");
