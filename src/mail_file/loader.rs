@@ -48,6 +48,11 @@ fn parse_mail_file(mail_file_contents: &String) -> Option<Vec<MailField>> {
         if temp.len() > 0 {
             temp += "\n";
         }
+        if current_line.chars().take(1).collect::<String>() == "\\" {
+            if current_line.len() == 1 { continue; }
+            temp += &current_line[1..];
+            continue;
+        }
         temp += current_line;
     }
 
