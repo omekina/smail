@@ -22,7 +22,7 @@ pub fn load_config(config_file_path: &String) -> Option<Vec<ConfigItem>> {
     let contents: String = match read_to_string(config_file_path) {
         Ok(value) => value,
         Err(_) => {
-            output::error("Could not read from ~/.smailconf file.");
+            output::error("Could not read from configuration file");
             println!("Maybe you forgot to 'smail init'?");
             return None;
         },
