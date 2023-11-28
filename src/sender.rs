@@ -23,7 +23,8 @@ Send `.smail` files identified by command line arguments.
 pub fn send(
     arguments: &Vec<String>,
     configuration: &Vec<ConfigItem>,
-    stdin_override: &String
+    stdin_override: &String,
+    stdin_override_newline: &String,
 ) -> Option<()> {
     let mut to_send: Vec<Vec<MailField>> = Vec::new();
 
@@ -34,7 +35,7 @@ pub fn send(
         }
     } else if stdin_override.len() != 0 {
         output::warning("Overriding stdin with flag data");
-        to_send.push(parse_mail_file(&stdin_override.replace("\\n", "\n"))?);
+        to_send.push(parse_mail_file(&stdin_override.replace(stdin_override_newline, "\n"))?);
     } else {
         output::warning("Reading from stdin...");
         let mut input = String::new();

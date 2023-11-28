@@ -51,6 +51,11 @@ fn runtime() -> i32 {
         Some(value) => { stdin_override = value; },
         None => {},
     };
+    let mut stdin_override_newline = String::from("\\n");
+    match flags::find_flag("stdin-override-newline", &argument_flags) {
+        Some(value) => { stdin_override_newline = value; }
+        None => {},
+    };
 
     /* Get target action and trim the arguments. */
     if console_arguments.len() == 0 {
@@ -84,7 +89,12 @@ fn runtime() -> i32 {
 
     /* If send command was issued -> send e-mail(s). */
     if action == "send" {
-        return match sender::send(&console_arguments, &configuration, &stdin_override) {
+        return match sender::send(
+            &console_arguments,
+            &configuration,
+            &stdin_override,
+            &stdin_override_newline
+        ) {
             Some(_) => 0,
             None => 1,
         };
