@@ -52,7 +52,7 @@ fn runtime() -> i32 {
         None => {},
     };
     let mut stdin_override_newline = String::from("\\n");
-    match flags::find_flag("stdin-override-newline", &argument_flags) {
+    match flags::find_flag("argument-override-newline", &argument_flags) {
         Some(value) => { stdin_override_newline = value; }
         None => {},
     };
