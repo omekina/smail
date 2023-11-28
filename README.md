@@ -150,6 +150,20 @@ configuration file template and replaced with the section from the current e-mai
 
 To see more info about this. Take a look into newly created configuration file (init).
 
+### Escaping lines
+If you want to send a line that begins with the `==` character sequence you can use the `\` character to escape the whole line.
+If the `\` character is the first character on a line it will get removed. Anything after it will remain.
+
+Line:
+```text
+\\==
+```
+will resolve to:
+```text
+\==
+```
+and will not get treated as a section flag. Since the first two letters before resolving aren't `==`.
+
 ### Piping `.smail` files from other programs
 SMAIL can also accept `.smail` files from stdin. If no filepath is specified with the
 send command, SMAIL will default to reading from stdin.
