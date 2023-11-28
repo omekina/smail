@@ -1,4 +1,3 @@
-use std::env::var_os;
 use std::fs::read_to_string;
 use crate::io::output;
 
@@ -23,7 +22,7 @@ pub fn load_config(config_file_path: &String) -> Option<Vec<ConfigItem>> {
     let contents: String = match read_to_string(config_file_path) {
         Ok(value) => value,
         Err(_) => {
-            output::error("Could not read from ~/.smailconf file.");
+            output::error("Could not read from configuration file");
             println!("Maybe you forgot to 'smail init'?");
             return None;
         },
@@ -110,13 +109,4 @@ pub fn search_key_in_config(configuration: &Vec<ConfigItem>, key: &str) -> Optio
     output::error("Configuration file entry was not found:");
     println!("{}", key);
     return None;
-}
-
-
-/**
-Get absolute home folder path. Works only on Linux for now. :(
-*/
-pub fn get_home_folder() -> Option<String> {
-    let home_dir: String = var_os("HOME")?.into_string().ok()?;
-    return Some(home_dir);
 }

@@ -31,7 +31,7 @@ pub fn load_mail_file(filepath: &String) -> Option<Vec<MailField>> {
 /**
 Main e-mail file parsing function.
 */
-fn parse_mail_file(mail_file_contents: &String) -> Option<Vec<MailField>> {
+pub fn parse_mail_file(mail_file_contents: &String) -> Option<Vec<MailField>> {
 
     let mail_file_lines = mail_file_contents.split("\n");
     let mut result: Vec<MailField> = Vec::new();
@@ -47,6 +47,11 @@ fn parse_mail_file(mail_file_contents: &String) -> Option<Vec<MailField>> {
         }
         if temp.len() > 0 {
             temp += "\n";
+        }
+        if current_line.chars().take(1).collect::<String>() == "\\" {
+            if current_line.len() == 1 { continue; }
+            temp += &current_line[1..];
+            continue;
         }
         temp += current_line;
     }
