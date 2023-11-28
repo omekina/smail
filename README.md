@@ -159,6 +159,27 @@ cat test.smail | smail send
 The command above can be achieved with SMAIL alone, but if you wish to generate a file
 on the fly and send it immediately... this might come in handy.
 
+### Specifying `.smail` file in command line argument
+If stdin is not an option in your case and your implementation can set command line arguments, then this
+could be a good option for you.
+```shell
+./smail --config="smailconf" --stdin="==SUBJECT\nTest e-mail\n==FROM\nAlice Smith;alice@nonexistent.domain\n==TO\nbob@nonexistent.domain\n==STYLE\nbody {font-family: Arial;}\n==BODY\n<h1>Hello, world</h1>" send
+```
+This will override the stdin with whatever you put in the `--stdin` flag (but with a small catch).
+
+Anytime the program sees the string literal `\n` in the `--stdin` flag it will replace it with an actual newline.
+As I can't figure out a case where you would actually need to use that string, there is no escape for it.
+
+If you wish to send an actual `\n` in your mail then keep in mind that we are in HTML. `&#92;n`
+
+If this doesn't work for you, you can also use `--argument-override-newline` and specify which line termination sequence
+you would like to use.
+```shell
+./smail --config="smailconf" --argument-override-newline="a" --stdin="==SUBJECTaTest e-mila==FROMaAlice Smith;lice@nonexistent.domina==TOabob@nonexistent.domina==STYLEabody {font-fmily: Aril;}a==BODYa<h1>Hello, world</h1>" send
+```
+
+The termination sequence can be however long your RAM can handle.
+
 ### Create
 `smail create <filename>` will create a file at `<filename>.smail`.
 The file will have some predefined contents (which you can then change).
