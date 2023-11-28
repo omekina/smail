@@ -168,7 +168,6 @@ could be a good option for you.
 This will override the stdin with whatever you put in the `--stdin` flag (but with a small catch).
 
 Anytime the program sees the string literal `\n` in the `--stdin` flag it will replace it with an actual newline.
-As I can't figure out a case where you would actually need to use that string, there is no escape for it.
 
 If you wish to send an actual `\n` in your mail then keep in mind that we are in HTML. `&#92;n`
 
