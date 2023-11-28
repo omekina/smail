@@ -45,6 +45,13 @@ fn runtime() -> i32 {
         None => {},
     };
 
+    /* Override stdin if stdin flag is present. */
+    let mut stdin_override = String::new();
+    match flags::find_flag("stdin", &argument_flags) {
+        Some(value) => { stdin_override = value; },
+        None => {},
+    };
+
     /* Get target action and trim the arguments. */
     if console_arguments.len() == 0 {
         io::output::warning("No command specified.");
@@ -77,7 +84,7 @@ fn runtime() -> i32 {
 
     /* If send command was issued -> send e-mail(s). */
     if action == "send" {
-        return match sender::send(&console_arguments, &configuration) {
+        return match sender::send(&console_arguments, &configuration, &stdin_override) {
             Some(_) => 0,
             None => 1,
         };
