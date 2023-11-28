@@ -38,13 +38,11 @@ The default file is just a template. It should look like this:
 ```text
 ==SUBJECT
 Test e-mail
-==FROM-NAME
-Alice Smith
-==FROM-MAIL
-alice@nonexistent.domain
+==FROM
+Alice Smith;alice@nonexistent.domain
 ==TO
 bob@nonexistent.domain
-john@smith.domain
+John Smith;john@smith.domain
 ==STYLE
 body {
     font-family: Arial;
@@ -54,14 +52,18 @@ body {
 <p>This is a test mail file from SMAIL.</p>
 <p>
     You can find SMAIL source code
-    <a href="https://github.com/omekina/smail">here</a>
+    <a href=\"https://github.com/omekina/smail\">here</a>
     if you are interested. &#128522;
 </p>
 ```
 
 Now you need to change the individual fields. Or you can keep them and watch the e-mail get lost somewhere in the cloud. :)
-The fields: _SUBJECT_, _FROM-NAME_, _FROM-MAIL_ and _TO_ are special. They are directly processed by the executable.
+The fields: _SUBJECT_, _FROM_ and _TO_ are special. They are directly processed by the executable.
 So please keep them clean. You can work as you please with the other fields. (for more info refer to the documentation bellow)
+
+The fields _FROM_ and _TO_ can contain either just some e-mail or name and e-mail. If you wish
+to include name you can use the following syntax: `Some Name;someemail@some.domain` (name and e-mail are
+separated by delimiter `;` character)
 
 It is also worth mentioning that the field _TO_ can contain multiple addresses. And they should be separated by the `\n` (newline) character.
 
@@ -83,7 +85,7 @@ Test e-mail
 ```
 Of course, this is going to vary depending on the amount of files being sent and their subjects (if nothing goes wrong). :)
 
-## How to use SMAIL
+## How SMAIL works
 
 ### Init
 SMAIL init is a nice config creator tool. It creates a config file
@@ -100,6 +102,18 @@ If you want to overwrite existing config file you can use:
 smail init --overwrite
 ```
 
+### Custom config location
+If you wish to override the default `~/.smailconf` location you can use the `--config` flag.
+You must use absolute path when specifying custom config.
+```shell
+smail --config=/home/user/email/personal/.smailconf send <filename> <?filename> <?filename> ...
+```
+
+The custom config flag works on any smail command which uses the config file.
+```shell
+smail --config=/home/user/email/work/.smailconf init
+```
+
 ### SMAIL file structure
 This command creates a new e-mail file in your current working directory
 (so remember to `cd` properly).
@@ -108,13 +122,11 @@ E-Mail files should have the following structure:
 ```text
 ==SUBJECT
 Test e-mail
-==FROM-NAME
-Alice Smith
-==FROM-MAIL
-alice@nonexistent.domain
+==FROM
+Alice Smith;alice@nonexistent.domain
 ==TO
 bob@nonexistent.domain
-john@smith.domain
+John Smith;john@smith.domain
 ==STYLE
 body {
     font-family: Arial;
@@ -138,6 +150,14 @@ configuration file template and replaced with the section from the current e-mai
 
 To see more info about this. Take a look into newly created configuration file (init).
 
+### Piping `.smail` files from other programs
+SMAIL can also accept `.smail` files from stdin. If no filepath is specified with the
+send command, SMAIL will default to reading from stdin.
+```shell
+cat test.smail | smail send
+```
+The command above can be achieved with SMAIL alone, but if you wish to generate a file
+on the fly and send it immediately... this might come in handy.
 
 ### Create
 `smail create <filename>` will create a file at `<filename>.smail`.
@@ -155,8 +175,8 @@ extension will be added by SMAIL.
 
 ### Send
 `smail send <filename> <?filename> <?filename> ...` will send the mail according to settings in config file
-and the contents of the target `.smail` file. <b>Do not specify the `.smail` file extension
-as it is added automatically.</b>
+and the contents of the target `.smail` file. Do not specify the `.smail` file extension
+as it is added automatically.
 
 ## How to pronounce SMAIL
 Since quite a lot of software defines pronunciation, I thought SMAIL should too.
