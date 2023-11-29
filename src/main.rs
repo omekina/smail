@@ -4,7 +4,7 @@ mod io;
 mod connection;
 mod sender;
 mod flags;
-
+mod help;
 
 use std::env::args;
 use config::loader::{ConfigItem, load_config};
@@ -60,6 +60,7 @@ fn runtime() -> i32 {
     /* Get target action and trim the arguments. */
     if console_arguments.len() == 0 {
         io::output::warning("No command specified.");
+        println!("To see all possible commands, run \"smail help\".");
         return 1;
     }
     let action = console_arguments[0].clone();
@@ -100,8 +101,15 @@ fn runtime() -> i32 {
         };
     }
 
+    /* If help command was issued -> display help. */
+
+    if action == "help" {
+        help::printhelp();
+        return 0;
+    }
+
     /* If no command was matched -> exit. */
-    io::output::warning("Command not known:");
-    println!("{}", action);
+    io::output::warning(&format!("Command not known: {}", action));
+    println!("To see all possible commands, run \"smail help\".");
     return 1;
 }

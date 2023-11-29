@@ -15,16 +15,22 @@ pub struct MailField {
 Load e-mail file into fields.
 */
 pub fn load_mail_file(filepath: &String) -> Option<Vec<MailField>> {
-    let contents: String = match read_to_string(&(filepath.clone() + ".smail")) {
-        Ok(value) => value,
-        Err(_) => {
-            output::error("Could not read from SMAIL file.");
-            println!("Maybe you forgot to 'smail create'?");
-            return None;
-        },
-    };
+    let possiblepaths = vec![
+        filepath.clone(),
+        (filepath.clone() + ".smail")
+    ];
 
-    return parse_mail_file(&contents);
+    for path in possiblepaths {
+        let contents = read_to_string(path);
+
+        if contents.is_ok() {
+            return parse_mail_file(&contents.ok()?);
+        }
+    }
+
+    output::error("Could not read from SMAIL file.");
+    println!("Maybe you forgot to 'smail create'?");
+    return None;
 }
 
 
